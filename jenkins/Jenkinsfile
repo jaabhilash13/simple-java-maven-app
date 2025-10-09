@@ -38,5 +38,18 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "Deploying to ${params.ENVIRONMENT} environme
+                echo "Deploying to ${params.ENVIRONMENT} environment"
+                sh "echo 'Deploying to ${params.ENVIRONMENT}'"
+            }
+        }
+    }
 
+    post {
+        success {
+            echo "Pipeline completed successfully for ${params.ENVIRONMENT}"
+        }
+        failure {
+            echo "Pipeline failed for ${params.ENVIRONMENT}"
+        }
+    }
+}
