@@ -1,33 +1,42 @@
 pipeline {
     agent any
-    options {
-        skipStagesAfterUnstable()
+
+    tools {
+        maven 'M3'
     }
+
+    parameters {
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['dev', 'qa', 'prod'],
+            description: 'Select environment to build/deploy'
+        )
+    }
+
+    environment {
+        JAVA_HOME = "/usr/lib/jvm/java-21-openjdk"
+        PATH = "${JAVA_HOME}/bin:/usr/share/maven/bin:${env.PATH}"
+    }
+
     stages {
+        stage('Checkout') {
+            steps {
+                echo "Checking out code from GitHub"
+                git branch: 'master', url: 'https://github.com/jaabhilash13/simple-java-maven-app.git'
+            }
+        }
+
         stage('Build') {
-        steps {
-        echo "Building for ${params.ENVIRONMENT} environment"
-        sh """
-        export PATH=/usr/share/maven/bin:\$PATH
-        java -version
-        mvn clean package -Denv=${params.ENVIRONMENT}
-        """
-    }
-        }
-        stage('Test') {
             steps {
-                sh 'mvn test'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
+                echo "Building for ${params.ENVIRONMENT} environment"
+                sh """
+                java -version
+                mvn clean package -Denv=${params.ENVIRONMENT}
+                """
             }
         }
-        stage('Deliver') { 
+
+        stage('Deploy') {
             steps {
-                sh './jenkins/scripts/deliver.sh' 
-            }
-        }
-    }
-}
+                echo "Deploying to ${params.ENVIRONMENT} environme
+
